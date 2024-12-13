@@ -67,3 +67,14 @@ class UserIssue(models.Model):
 
     
 
+
+class IssueReply(models.Model):
+    issueID = models.ForeignKey(UserIssue, on_delete=models.CASCADE)
+    repliedBy = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
+    message = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    def __str__(self):
+        return self.message
+    
+    
