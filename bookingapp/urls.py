@@ -6,7 +6,7 @@ urlpatterns = [
     path('postBookings' , views.postBookings, name='postBookings'),
     path('getMyBookings' , views.getMyBookings, name='getMyBookings'),
     path('updateBookings' , views.updateBookings, name='updateBookings'),
-    
+    path('getDoctorBookings' , views.getDoctorBookings, name='getDoctorBookings'),
 ]
 
 

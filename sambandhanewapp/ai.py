@@ -13,10 +13,17 @@ model = genai.GenerativeModel("gemini-1.5-flash")
 
 
 
-def filterComment(request, comment):
-    comment = comment
+def filterComment(request, commentdata):
+    comment = commentdata['message']
+    issueID = commentdata['issueID']
+    
     try:
-        response = model.generate_content(f"Is the following comment abusive in any language? {comment} Answer only with 'yes' or 'no'.")
+        user_issue = UserIssue.objects.get(id = issueID)
+        prompts = {
+            f"Is the following comment abusive in any language? {comment} Answer only with 'yes' or 'no'.",
+            f"Is the following comment is related to this issue? {user_issue} Answer only with 'yes' or 'no'.",
+        }
+        response = model.generate_content(f"{prompts}")
         response_text = response.text.strip().lower()
         if response_text == 'yes':
             return  True
