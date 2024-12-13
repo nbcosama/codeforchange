@@ -31,9 +31,7 @@ class UserAccount(models.Model):
     updatedAt = models.DateTimeField(auto_now=True)
     def __str__(self):
         return self.userID
-    def __save__(self):
-        self.updated_at = timezone.now()
-        return super().save()
+   
     
 
 
