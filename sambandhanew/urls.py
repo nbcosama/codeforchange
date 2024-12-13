@@ -23,5 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('sambandhanewapp.urls')),
     path('', include('mitraapp.urls')),
+    path('', include('bookingapp.urls')),
 
 ]

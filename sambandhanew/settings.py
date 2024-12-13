@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'sambandhanewapp',
     'mitraapp',
+    'bookingapp',
     'rest_framework',
 ]
 
