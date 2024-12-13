@@ -13,3 +13,10 @@ class UserIssueSerializer(serializers.ModelSerializer):
         model = UserIssue
         fields = [ 'id', 'issuedBy', 'title', 'description', 'preferredCharacter', 'gotRelation', 'private', 'createdAt']
 
+
+
+class IssueReplySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IssueReply
+        fields = ['id', 'issueID', 'repliedBy', 'message', 'date']
+

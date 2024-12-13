@@ -82,3 +82,35 @@ def issue_api(request):
     else:
         return Response({"success": False})
         
+
+
+
+
+@api_view(['POST'])
+def postIssueReply(request):
+    data = request.data
+    issueID = data['issueID']
+    repliedBy = data['repliedBy']
+    try:
+        user_account = UserAccount.objects.get(userID = repliedBy)
+        user_issue = UserIssue.objects.get(id = issueID)
+        data['repliedBy'] = user_account.id
+        issue_reply_serialier = IssueReplySerializer(data = data)
+        if issue_reply_serialier.is_valid():
+            create_reply = IssueReply.objects.create(
+                issueID = user_issue,
+                repliedBy = user_account,
+                message = data['message'],
+                date = timezone.now()
+            )
+            issuse_data = issue_reply_serialier.data
+            issuse_data['id'] = create_reply.id
+            issuse_data['repliedBy'] = repliedBy
+            issuse_data['date'] = create_reply.date
+            return Response({ "success": True, "data": issuse_data})
+        else:
+            return Response({ "success": False, "data": issue_reply_serialier.errors})
+    except Exception as e:
+        return Response({ "success": False})
+
+
