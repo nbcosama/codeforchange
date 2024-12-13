@@ -55,3 +55,30 @@ def getUser(request):
         return Response({"success":True, "data": user_serializer.data})
     else:
         return Response({"success":False})
+    
+
+
+
+
+@api_view(['POST'])
+def issue_api(request):
+    datas = request.data
+    main_user = UserAccount.objects.get(userID = datas['issuedBy'])
+    datas['issuedBy'] = main_user.id
+    user_issue = UserIssue.objects.all()
+    user_issue_serializer = UserIssueSerializer(data = datas)
+    
+    if user_issue_serializer.is_valid():
+        user_issue = UserIssue.objects.create(
+            issuedBy = main_user,
+            title = datas['title'],
+            description = datas['description'],
+            preferredCharacter = datas['preferredCharacter'],
+            gotRelation = datas['gotRelation'],
+            private = datas['private'],
+            createdAt = timezone.now()
+        )
+        return Response({"success": True, "data": user_issue_serializer.data})
+    else:
+        return Response({"success": False})
+        
