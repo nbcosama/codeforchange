@@ -39,5 +39,31 @@ class UserAccount(models.Model):
 
 
 
+class UserIssue(models.Model):
+        CHARACTERFIELD = [
+                ('father', 'Father'),
+                ('mother', 'Mother'),
+                ('son', 'Son'),
+                ('daughter', 'Daughter'),
+                ('grandfather', 'Grandfather'),
+                ('grandmother', 'Grandmother'),
+                ('uncle', 'Uncle'),
+
+                ]   
+        issuedBy  = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
+        title = models.CharField(max_length=100)
+        description = models.TextField()
+        preferredCharacter = models.CharField(max_length=100, choices=CHARACTERFIELD)
+        gotRelation  = models.BooleanField(default=False)
+        private = models.BooleanField(default=True)
+        createdAt = models.DateTimeField(auto_now_add=True)
+        updated_at = models.DateTimeField(auto_now=True)
+        def __str__(self):
+            return self.title
+        def __save__(self):
+            self.updated_at = timezone.now()
+            return super().save()
+        
+
     
 
