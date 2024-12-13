@@ -38,16 +38,6 @@ class UserAccount(models.Model):
 
 
 
-# class PostIssue(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     title = models.CharField(max_length=100)
-#     description = models.TextField()
-#     createdAt = models.DateTimeField(auto_now_add=True)
-#     updatedAt = models.DateTimeField(auto_now=True)
-#     def __str__(self):
-#         return self.title
-#     def __save__(self):
-#         self.updated_at = timezone.now()
-#         return super().save()
+
     
 

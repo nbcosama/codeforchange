@@ -41,5 +41,17 @@ def create_account_api(request):
             return Response({"success": False})
     
 
-def test(request):
-    return HttpResponse('test')
+
+
+
+
+@api_view(['POST'])
+def getUser(request):
+    datas = request.data
+    user_account = UserAccount.objects.all()
+    if user_account.filter(userID = datas['userID']):
+        user_account = UserAccount.objects.filter( userID = datas['userID'] )
+        user_serializer = UserAccountSerializer(user_account, many=True)
+        return Response({"success":True, "data": user_serializer.data})
+    else:
+        return Response({"success":False})
