@@ -121,8 +121,9 @@ class CommentReply(models.Model):
 class Report(models.Model):
     REPORTYPE = [
         ('issue', 'Issue'),
-        ('comment', 'Comment'),
         ('reply', 'Reply'),
+        ('comment', 'Comment'),
+        ('reComment', 'Re-Comment'),
         ('mitra', 'Mitra'),
     ]
     type = models.CharField(max_length=100, choices=REPORTYPE)
@@ -136,6 +137,9 @@ class Report(models.Model):
     updatedAt = models.DateTimeField(auto_now=True)
     def _str_(self):
         return f"{self.message} -- {self.status}"
+
+
+        
     
 
 

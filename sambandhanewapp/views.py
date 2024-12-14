@@ -7,7 +7,9 @@ from .serializers import *
 from django.utils import timezone
 from django.db.models import Q
 from .ai import filterComment, filterReply, checkCriticalIssue, aiComment
-# Create your views here.
+from django.shortcuts import get_object_or_404
+from mitraapp.ai import mitraComment
+
 
 
 def home(request):
@@ -86,6 +88,7 @@ def issue_api(request):
         )
         createdID = user_issue.pk
         AiComment = aiComment(datas, createdID)
+        mitracomment = mitraComment(datas, createdID)
         return Response({"success": True, "data": user_issue_serializer.data, 'critical': criticalIssue})
     else:
         return Response({"success": False})
@@ -185,6 +188,44 @@ def get_all_issues_api(request):
                 return Response({ "success":True, "data": categorized_issues})
         except Exception as e:
             return Response({ "success":False})
+
+
+
+
+
+
+@api_view(['POST'])
+def getMyIssues(request):
+    data = request.data
+    userID = data["userID"]
+    if userID:
+        try:
+            user_account = UserAccount.objects.get( userID = userID )
+            myIssues = UserIssue.objects.filter( issuedBy_id = user_account.id ).order_by("-id")
+            user_serializer = UserIssueSerializer(myIssues, many=True)
+            myIssues = {
+                "private_issues": [],
+                "public_issues": []
+            }
+            fnl = user_serializer.data
+            for f in fnl:
+                f["issuedBy"]= userID
+                f["userName"] = user_account.userName
+                if f.get('private', False):
+                    myIssues["private_issues"].append(f)
+                    pReplycount = IssueReply.objects.filter(issueID = f['id']).count()
+                    f['reply_count'] = pReplycount
+                else: 
+                    myIssues["public_issues"].append(f)
+                    comments = ParentComment.objects.filter(issueID = f['id'])
+                    f['comments_count'] = len(comments)
+            return Response({"success":True, "data": myIssues})
+        except Exception as e:
+            return Response({ "success":False})
+    else:
+        return Response({"success":False})
+   
+
 
 
 
@@ -452,10 +493,12 @@ def postReport(request):
    
     # Map report types to models for dynamic fetching
     model_map = {
-        "issue": IssueReply,
+        "issue": UserIssue,
+        "reply": IssueReply,
         "comment": ParentComment,
-        "reply": CommentReply,  
+        "reComment": CommentReply,
     }
+
     # Fetch the appropriate model dynamically
     model_class = model_map[report_type]
     try:
@@ -466,7 +509,6 @@ def postReport(request):
             status=404
         )
         
-        
     # Save the report
     report = Report.objects.create(
         type=report_type,
@@ -476,6 +518,7 @@ def postReport(request):
     )
 
     return Response({"success": True, "data": report.id})
+
 
 
 
@@ -498,3 +541,81 @@ def postFeedback(request):
     return Response({"success": True, "data": feedback.id})
 
 
+
+
+
+
+
+
+
+
+@api_view(['GET'])
+def getAllReports(request):
+    reports = Report.objects.all()
+    report_serializer = ReportSerializer(reports, many=True)
+    # Map report types to models for dynamic fetching
+    model_map = {
+        "issue": UserIssue,
+        "reply": IssueReply,
+        "comment": ParentComment,
+        "reComment": CommentReply,
+    }
+
+    for report in report_serializer.data:
+        report_type = report["type"]
+        type_id = report["typeID"]
+        reportedid= report['reportedBy']
+
+
+        model_class = model_map.get(report_type)
+        if model_class:
+            try:
+                # Fetch and serialize the reported object
+                reported_object = get_object_or_404(model_class, id=type_id)
+                #get each model inner all info such as using IssueReplySerializer
+                if report_type == "issue":
+                    reported_object = UserIssue.objects.get(pk=type_id)
+                    reported_object = UserIssueSerializer(reported_object).data
+                    
+
+                elif report_type == "reply":
+                    reported_object = IssueReply.objects.get(pk=type_id)
+                    reported_object = IssueReplySerializer(reported_object).data
+
+                elif report_type == "comment":
+                    reported_object = ParentComment.objects.get(pk=type_id)
+                    reported_object = ParentCommentSerializer(reported_object).data
+
+                elif report_type == "reComment":
+                    reported_object = CommentReply.objects.get(pk=type_id)
+                    reported_object = ReCommentSerializer(reported_object).data
+
+                # Update reports with serialized reported objects
+                try:
+                    reported_by = UserAccount.objects.get(id=reportedid)
+                    report['reportedBy'] = reported_by.userID
+                except UserAccount.DoesNotExist:
+                    return Response({"success": False, "message": "Invalid reportedBy user ID."}, status=404)
+
+                report["reportedObject"] = reported_object
+
+            except model_class.DoesNotExist:
+                report["reportedObject"] = None
+        else:
+            report["reportedObject"] = None
+
+    # Return the updated report list
+    return Response({"success": True, "data": report_serializer.data})
+
+
+
+
+
+@api_view(['GET'])
+def getAllFeedbacks(request):
+    feedbacks = Feedback.objects.all()
+    feedback_serializer = FeedbackSerializer(feedbacks, many=True)
+    for feedback in feedback_serializer.data:
+        reported_by = UserAccount.objects.get(id=feedback["reportedBy"])
+        feedback["reportedBy"] = reported_by.userID
+    return Response({"success": True, "data": feedback_serializer.data})

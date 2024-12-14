@@ -59,3 +59,18 @@ class ReCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = CommentReply
         fields = ['id', 'commentID', 'reCommentedBy', 'message', 'agree', 'disagree', 'date']
+
+
+
+
+
+
+class ReportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Report
+        fields = ['id', 'type', 'typeID', 'reportedBy', 'message', 'status', 'createdAt', 'updatedAt']
+
+class FeedbackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Feedback
+        fields = ['id', 'reportedBy', 'message', 'createdAt', 'updatedAt']

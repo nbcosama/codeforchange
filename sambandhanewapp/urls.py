@@ -19,9 +19,14 @@ urlpatterns = [
     path('updateReCommentAgree', views.updateReCommentAgree, name='updateReCommentAgree'),
     path('getMyComments', views.getMyComments, name='getMyComments'),
     path('filterIssueCategory', ai.filterIssueCategory, name='filterIssueCategory'),
+    path('getMyIssues', views.getMyIssues, name='getMyIssues'),
 
     path('postReport', views.postReport, name='postReport'),
     path('postFeedback', views.postFeedback, name='postFeedback'),
+
+
+    path('getAllReports', views.getAllReports, name='getMyReports'),
+    path('getAllFeedbacks', views.getAllFeedbacks, name='getMyFeedbacks'),
 ]
 
 

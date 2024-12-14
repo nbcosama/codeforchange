@@ -1,4 +1,5 @@
 GEMINI_API_KEY= 'AIzaSyB3Ql-TZXHmk-FzT8adI8ELJxPvvjvqJX0'
+
 import google.generativeai as genai
 from .models import *
 from .serializers import *
@@ -38,13 +39,16 @@ def checkCriticalIssue(request, datas):
 def filterComment(request, commentdata):
     comment = commentdata['message']
     issueID = commentdata['issueID']
+    print(comment)
     try:
         user_issue = UserIssue.objects.get(id = issueID)
         prompts = {
-            f"Is the following comment abusive in any language? {comment} Answer only with 'yes' or 'no'. Or Is the following comment is related to this issue? {user_issue} Answer only with 'yes' or 'no'.",
+            f"comment{comment}"
+            f"Is the comment abusive or not related to the given issue {user_issue} Answer only with 'yes' or 'no'. Or Is the following comment abusive in any language? {comment} Answer only with 'yes' or 'no'.",
         }
         response = model.generate_content(f"{prompts}")
         response_text = response.text.strip().lower()
+        print(response_text)
         if response_text == 'yes':
             return  True
         return False
@@ -133,7 +137,6 @@ def aiComment(datas, createdID):
     response = model.generate_content(f"{prompts}")
     response_text = response.text.strip().lower()
     data['message'] = response_text
-    print(response_text)
     try:
         user_account = UserAccount.objects.get(userID = commentedBy)
         user_issue = UserIssue.objects.get(id = issueID)
@@ -151,3 +154,5 @@ def aiComment(datas, createdID):
        
     except Exception as e:
         return Response({ "success": False})
+
+
