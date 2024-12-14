@@ -60,9 +60,7 @@ class UserIssue(models.Model):
         updated_at = models.DateTimeField(auto_now=True)
         def __str__(self):
             return self.title
-        def __save__(self):
-            self.updated_at = timezone.now()
-            return super().save()
+        
         
 
     

@@ -67,8 +67,8 @@ def getUser(request):
 def issue_api(request):
     datas = request.data
     criticalIssue = checkCriticalIssue(request, datas)
-    if criticalIssue == True:
-        return Response({"success": False, "message": "Rejected! This issue is critical"})
+    if criticalIssue['abusive'] == 'yes':
+        return Response({"success": False, "message": "Rejected! Your issue was abusive"})
     main_user = UserAccount.objects.get(userID = datas['issuedBy'])
     datas['issuedBy'] = main_user.id
     user_issue = UserIssue.objects.all()
@@ -84,7 +84,7 @@ def issue_api(request):
             private = datas['private'],
             createdAt = timezone.now()
         )
-        return Response({"success": True, "data": user_issue_serializer.data})
+        return Response({"success": True, "data": user_issue_serializer.data, 'Critical': criticalIssue['critical']})
     else:
         return Response({"success": False})
         
