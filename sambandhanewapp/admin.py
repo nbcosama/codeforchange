@@ -9,3 +9,8 @@ admin.site.register(IssueReply)
 admin.site.register(Relation)
 admin.site.register(ParentComment)
 admin.site.register(CommentReply)
+admin.site.register(Report)
+admin.site.register(Feedback)
+
+
+

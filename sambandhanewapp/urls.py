@@ -20,6 +20,8 @@ urlpatterns = [
     path('getMyComments', views.getMyComments, name='getMyComments'),
     path('filterIssueCategory', ai.filterIssueCategory, name='filterIssueCategory'),
 
+    path('postReport', views.postReport, name='postReport'),
+    path('postFeedback', views.postFeedback, name='postFeedback'),
 ]
 
 

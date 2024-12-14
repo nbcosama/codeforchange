@@ -115,3 +115,34 @@ class CommentReply(models.Model):
         return self.message
     
 
+
+
+
+class Report(models.Model):
+    REPORTYPE = [
+        ('issue', 'Issue'),
+        ('comment', 'Comment'),
+        ('reply', 'Reply'),
+        ('mitra', 'Mitra'),
+    ]
+    type = models.CharField(max_length=100, choices=REPORTYPE)
+
+    typeID = models.CharField(max_length=50, null=True, blank=True)  # Keep it simple for ID storage
+
+    reportedBy = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
+    message = models.TextField()
+    status =  models.CharField(max_length=100, default="pending")
+    createdAt = models.DateTimeField(auto_now_add=True)
+    updatedAt = models.DateTimeField(auto_now=True)
+    def _str_(self):
+        return f"{self.message} -- {self.status}"
+    
+
+
+class Feedback(models.Model):
+    reportedBy = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
+    message = models.TextField()
+    createdAt = models.DateTimeField(auto_now_add=True)
+    updatedAt = models.DateTimeField(auto_now=True)
+    def _str_(self):
+        return f"{self.message} -- {self.createdAt}"

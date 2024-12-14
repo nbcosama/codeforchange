@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view
 from .serializers import *
 from django.utils import timezone
 from django.db.models import Q
-from .ai import filterComment, filterReply, checkCriticalIssue
+from .ai import filterComment, filterReply, checkCriticalIssue, aiComment
 # Create your views here.
 
 
@@ -67,8 +67,8 @@ def getUser(request):
 def issue_api(request):
     datas = request.data
     criticalIssue = checkCriticalIssue(request, datas)
-    if criticalIssue['abusive'] == 'yes':
-        return Response({"success": False, "message": "Rejected! Your issue was abusive"})
+    if criticalIssue == True:
+        return Response({"success": False, "message": "Please don't use abusive words"})
     main_user = UserAccount.objects.get(userID = datas['issuedBy'])
     datas['issuedBy'] = main_user.id
     user_issue = UserIssue.objects.all()
@@ -84,7 +84,9 @@ def issue_api(request):
             private = datas['private'],
             createdAt = timezone.now()
         )
-        return Response({"success": True, "data": user_issue_serializer.data, 'Critical': criticalIssue['critical']})
+        createdID = user_issue.pk
+        AiComment = aiComment(datas, createdID)
+        return Response({"success": True, "data": user_issue_serializer.data, 'critical': criticalIssue})
     else:
         return Response({"success": False})
         
@@ -229,6 +231,7 @@ def postComment(request):
     issueID = data['issueID']
     commentedBy = data['commentedBy']
     commentdata = data
+    
     checkComment = filterComment(request, commentdata)
     if checkComment == True:
         return Response({"success": False, "message": "Rejected! Your comment was abusive or not related to this issue"})
@@ -420,6 +423,78 @@ def getMyRelations(request):
 
 
    
+@api_view(['POST'])
+def postReport(request):
+    data = request.data
 
+    # Extract required data
+    report_type = data.get("type")
+    type_id = data.get("typeID")
+    user_id = data.get("reportedBy")
+    message = data.get("message")
+
+
+    # Validate input
+    if not all([report_type, type_id, user_id, message]):
+        return Response({"success": False, "message": "All fields are required."}, status=400)
+
+    # Validate report type
+    valid_types = ["issue", "comment", "reply", "mitra"]
+    if report_type not in valid_types:
+        return Response({"success": False, "message": "Invalid report type."}, status=400)
+
+    # Fetch the reporting user
+    try:
+        reported_by = UserAccount.objects.get(userID=user_id)
+    except UserAccount.DoesNotExist:
+        return Response({"success": False, "message": "Invalid reportedBy user ID."}, status=404)
+   
+   
+    # Map report types to models for dynamic fetching
+    model_map = {
+        "issue": IssueReply,
+        "comment": ParentComment,
+        "reply": CommentReply,  
+    }
+    # Fetch the appropriate model dynamically
+    model_class = model_map[report_type]
+    try:
+        reported_object = model_class.objects.get(pk=type_id)
+    except model_class.DoesNotExist:
+        return Response(
+            {"success": False, "message": f"Invalid {report_type} ID: {type_id}."},
+            status=404
+        )
+        
+        
+    # Save the report
+    report = Report.objects.create(
+        type=report_type,
+        typeID = type_id,
+        reportedBy=reported_by,
+        message=message,
+    )
+
+    return Response({"success": True, "data": report.id})
+
+
+
+
+@api_view(['POST'])
+def postFeedback(request):
+    data = request.data
+    user_id = data.get("reportedBy")
+    message = data.get("message")
+    if not all([user_id, message]):
+        return Response({"success": False, "message": "All fields are required."}, status=400)
+    try:
+        reported_by = UserAccount.objects.get(userID=user_id)
+    except UserAccount.DoesNotExist:
+        return Response({"success": False, "message": "Invalid reportedBy user ID."}, status=404)
+    feedback = Feedback.objects.create(
+        reportedBy=reported_by,
+        message=message,
+    )
+    return Response({"success": True, "data": feedback.id})
 
 

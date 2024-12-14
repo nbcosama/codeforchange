@@ -20,13 +20,15 @@ def checkCriticalIssue(request, datas):
     }
     response = model.generate_content(f"{prompts}")
     response_text = response.text.strip().lower()
-    prompts = {
+    prompts2 = {
         f"Is the following issue abusive in any language? {issue} Answer only with 'yes' or 'no'.",
     }
-    response2 = model.generate_content(f"{prompts}")
+    response2 = model.generate_content(f"{prompts2}")
     response_text2 = response2.text.strip().lower()
+    if response_text2 == 'yes':
+        return True
     if response_text == 'yes':
-        return ({'critical':True, 'abusive':response_text2})
+        return ({'critical':True})
     return False
 
     
@@ -113,3 +115,39 @@ def filterIssueCategory(request):
         return Response({'issueCategory': "Other"})
     except Exception as e:
         return Response({'issueCategory': False})
+
+
+
+
+
+
+def aiComment(datas, createdID):
+    data = datas
+    issueID = createdID
+    commentedBy = "kbfibrberhbfr"
+    comment = data['description']
+    prompts = {
+            f"comment{comment}"
+            f"Please review the given content and provide feedback in a friendly and approachable tone. Instead of suggesting to talk to someone else, directly offer the best solution to the issue in simple and practical terms, as if you are a helpful and understanding friend. comment must be 120 words not more",
+        }
+    response = model.generate_content(f"{prompts}")
+    response_text = response.text.strip().lower()
+    data['message'] = response_text
+    print(response_text)
+    try:
+        user_account = UserAccount.objects.get(userID = commentedBy)
+        user_issue = UserIssue.objects.get(id = issueID)
+        data['commentedBy'] = user_account.id
+       
+        comment = ParentComment.objects.create(
+            issueID = user_issue,
+            commentedBy = user_account,
+            message = data['message'],
+            agree = 0,
+            disagree = 0,
+            date = timezone.now()
+        )
+            
+       
+    except Exception as e:
+        return Response({ "success": False})
