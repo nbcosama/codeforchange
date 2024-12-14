@@ -624,3 +624,122 @@ def mitraComment(datas, createdID):
         return Response({ "success": False})
 
 
+
+
+
+
+
+
+doctorData = [
+  {
+    "id": 1,
+    "name": "Dr. Subhash Chandra Sharma",
+    "specialty": "Clinical Psychologist",
+    "experience": "25 years",
+    "expertise": "Human resilience, strengths-based psychology",
+    "description": "Dr. Subhash Chandra Sharma is a clinical psychologist with 25 years of experience. He focuses on understanding human strengths and resilience while helping individuals unlock their potential. As Chief of Clinical Services at CMCS Nepal, he has worked extensively to advance mental health care."
+  },
+  {
+    "id": 2,
+    "name": "Dr. Richa Amatya",
+    "specialty": "Psychiatrist",
+    "experience": "10+ years",
+    "expertise": "CBT, JPMR, psychiatric disorders including OCD, depression, schizophrenia",
+    "description": "Dr. Richa Amatya is an Associate Consultant Psychiatrist at Nepal Mediciti. She holds an MBBS from the University of Science and Technology, Bangladesh, and an MD in Psychiatry from Manipal College of Medical Sciences, Nepal. She is certified in TEAM-CBT and skilled in Jacobson’s Progressive Muscle Relaxation therapy (JPMR), addressing diverse conditions like OCD, anxiety, insomnia, eating disorders, and geriatric psychiatric issues."
+  },
+  {
+    "id": 3,
+    "name": "Dr. Arun Raj Kunwar",
+    "specialty": "Child & Adolescent Psychiatrist",
+    "experience": "20+ years",
+    "expertise": "Child & Adolescent Psychiatry, General Psychiatry",
+    "description": "Dr. Arun Raj Kunwar is the first Child & Adolescent Psychiatrist in Nepal and has made significant contributions to the development of mental health services for youth. He is a former President of the Psychiatrist's Association of Nepal (PAN), the founding editor of the Journal of PAN, and currently serves at Metro Kathmandu Hospital. He earned his M.D. in Psychiatry and completed a Fellowship in Child & Adolescent Psychiatry at SUNY Upstate Medical University in Syracuse, USA."
+  },
+  {
+    "id": 4,
+    "name": "Dr. Sanjeev Chandra Gautam",
+    "specialty": "Clinical Psychologist and Mental Health Specialist",
+    "experience": "15 years",
+    "expertise": "Cognitive Behavioral Therapy (CBT), managing depression, anxiety, and trauma recovery",
+    "description": "Dr. Sanjeev Chandra Gautam is a dedicated Clinical Psychologist with 15 years of experience in the field of mental health. He is highly skilled in applying Cognitive Behavioral Therapy (CBT) to help individuals manage conditions such as depression, anxiety, and trauma-related disorders. Dr. Gautam is passionate about fostering resilience and promoting emotional well-being through evidence-based therapeutic approaches."
+  },
+  {
+    "id": 5,
+    "name": "Mamata Pokharel",
+    "specialty": "Counseling Psychologist",
+    "experience": "2+ years",
+    "expertise": "Narrative therapy, mindfulness, emotional freedom techniques",
+    "description": "Mamata Pokharel is a skilled counselor offering sessions based on narrative therapy and mindfulness practices.",
+    
+  },
+  {
+    "id": 6,
+    "name": "Karuna Kunwar",
+    "specialty": "Psychologist",
+    "experience": "18 years",
+    "expertise": "Stress management, mindfulness, trauma counseling",
+    "description": "Karuna Kunwar is a UN-certified counselor experienced in managing severe mental health issues and stress.",
+   
+  },
+  {
+    "id": 7,
+    "name": "Prof. Dr. Sudarshan Narsingh Pradhan",
+    "specialty": "Consultant Neuro Psychiatrist",
+    "experience": "20 years",
+    "expertise": "Neuropsychiatric disorders, mood disorders, psychotic conditions, and neurodevelopmental issues",
+    "description": "Prof. Dr. Sudarshan Narsingh Pradhan is a highly respected Consultant Neuro Psychiatrist with over 30 years of experience in the field of mental health and neuroscience. He specializes in diagnosing and treating complex neuropsychiatric conditions, including mood disorders, schizophrenia, and neurodevelopmental disorders such as autism and ADHD. Dr. Pradhan is known for his compassionate approach, combining pharmacological interventions with psychotherapy to achieve the best outcomes for his patients. As an esteemed academic and clinician, he has mentored numerous young psychiatrists and contributed significantly to research and the development of mental health services in Nepal."
+  },
+  {
+    "id": 8,
+    "name": "Dr. Surendra Sherchan",
+    "specialty": "Consultant Psychiatrist",
+    "experience": "16 years",
+    "expertise": "Psychiatric evaluation, mood and anxiety disorders, addiction treatment, and mental health advocacy",
+    "description": "Dr. Surendra Sherchan is a seasoned Consultant Psychiatrist with 33 years of experience in the field of mental health care. He has dedicated his career to providing comprehensive psychiatric evaluations and personalized treatment plans for patients suffering from mood disorders, anxiety, and substance use disorders. Dr. Sherchan is an advocate for mental health awareness and has been actively involved in community outreach programs to destigmatize mental illnesses. His holistic approach combines evidence-based medical practices with compassionate care, empowering patients to achieve mental wellness and lead fulfilling lives."
+  },
+  {
+    "id": 9,
+    "name": "Dr. Binod Dev",
+    "specialty": "Psychologist",
+    "experience": "28",
+    "expertise": "Anxiety, depression, stress management",
+    "description": "Dr. Binod Dev provides structured counseling for anxiety and depression using evidence-based practices.",
+   
+  }
+]
+
+
+@api_view(['POST'])
+def aiSuggestion(request):
+    try:
+        # Get user input message from request data
+        user_message = request.data.get("message", "")
+
+        # Create the prompt for the AI model
+        prompt = (
+            f"Here is a list of doctors:\n{json.dumps(doctorData)}\n\n"
+            f"User's message: '{user_message}'\n\n"
+            f"Suggest the most suitable doctor from the list based on the user's message. "
+            f"Explain why the doctor is suitable and return the result in JSON format with the following keys: "
+            f"'doctor_id' (id of the doctor) and 'reason' (why they are suitable)."
+        )
+
+        # Call the AI model to generate a response
+        ai_response = model.generate_content(prompt)
+        ai_response_text = ai_response.text.strip()
+
+        # Clean up response (if necessary) and parse JSON
+        if ai_response_text.startswith("```json"):
+            ai_response_text = ai_response_text.strip("```json").strip("```")
+
+        # Attempt to parse the JSON response from the AI
+        parsed_response = json.loads(ai_response_text)
+
+        # Return the parsed response as a JSON response
+        return JsonResponse({"suggested_doctor": parsed_response}, status=200)
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Failed to parse AI response as JSON."}, status=500)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+  

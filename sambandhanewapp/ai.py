@@ -22,7 +22,8 @@ def checkCriticalIssue(request, datas):
     response = model.generate_content(f"{prompts}")
     response_text = response.text.strip().lower()
     prompts2 = {
-        f"Is the following issue abusive in any language? {issue} Answer only with 'yes' or 'no'.",
+        # f"Is the following issue abusive in any language? {issue} Answer only with 'yes' or 'no'.",
+        f"Does the following issue contain an exact abusive word or phrase? {issue} Answer only with 'yes' or 'no', considering only intentional abusive words.",
     }
     response2 = model.generate_content(f"{prompts2}")
     response_text2 = response2.text.strip().lower()

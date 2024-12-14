@@ -5,4 +5,5 @@ from . import ai
 urlpatterns = [
     path('meroSathi' , ai.meroSathi, name='meroSathi'),
     path('loadConversation', ai.loadConversation, name='loadConversation'),
+    path('aiSuggestion', ai.aiSuggestion, name='aiSuggestion'),
 ]
