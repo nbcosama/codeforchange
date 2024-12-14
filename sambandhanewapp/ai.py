@@ -1,4 +1,4 @@
-GEMINI_API_KEY= 'AIzaSyB3Ql-TZXHmk-FzT8adI8ELJxPvvjvqJX0'
+GEMINI_API_KEY= ''
 
 import google.generativeai as genai
 from .models import *
