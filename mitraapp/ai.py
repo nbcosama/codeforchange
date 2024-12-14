@@ -712,10 +712,7 @@ doctorData = [
 @api_view(['POST'])
 def aiSuggestion(request):
     try:
-        # Get user input message from request data
         user_message = request.data.get("message", "")
-
-        # Create the prompt for the AI model
         prompt = (
             f"Here is a list of doctors:\n{json.dumps(doctorData)}\n\n"
             f"User's message: '{user_message}'\n\n"
@@ -723,23 +720,14 @@ def aiSuggestion(request):
             f"Explain why the doctor is suitable and return the result in JSON format with the following keys: "
             f"'doctor_id' (id of the doctor) and 'reason' (why they are suitable)."
         )
-
-        # Call the AI model to generate a response
         ai_response = model.generate_content(prompt)
         ai_response_text = ai_response.text.strip()
-
-        # Clean up response (if necessary) and parse JSON
         if ai_response_text.startswith("```json"):
             ai_response_text = ai_response_text.strip("```json").strip("```")
-
-        # Attempt to parse the JSON response from the AI
         parsed_response = json.loads(ai_response_text)
-
-        # Return the parsed response as a JSON response
-        return JsonResponse({"suggested_doctor": parsed_response}, status=200)
-
+        return JsonResponse({ 'success':True, "suggested_doctor": parsed_response}, status=200)
     except json.JSONDecodeError:
-        return JsonResponse({"error": "Failed to parse AI response as JSON."}, status=500)
+        return JsonResponse({"success": False}, status=500)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
   
