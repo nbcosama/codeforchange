@@ -565,8 +565,6 @@ def getAllReports(request):
         report_type = report["type"]
         type_id = report["typeID"]
         reportedid= report['reportedBy']
-
-
         model_class = model_map.get(report_type)
         if model_class:
             try:
@@ -576,16 +574,12 @@ def getAllReports(request):
                 if report_type == "issue":
                     reported_object = UserIssue.objects.get(pk=type_id)
                     reported_object = UserIssueSerializer(reported_object).data
-                    
-
                 elif report_type == "reply":
                     reported_object = IssueReply.objects.get(pk=type_id)
                     reported_object = IssueReplySerializer(reported_object).data
-
                 elif report_type == "comment":
                     reported_object = ParentComment.objects.get(pk=type_id)
                     reported_object = ParentCommentSerializer(reported_object).data
-
                 elif report_type == "reComment":
                     reported_object = CommentReply.objects.get(pk=type_id)
                     reported_object = ReCommentSerializer(reported_object).data

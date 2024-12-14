@@ -80,8 +80,8 @@ class IssueReply(models.Model):
 
 
 class Relation(models.Model):
-    relationName = models.CharField(max_length=100, default="relation")
-    issueToken = models.CharField(max_length=100, default="")
+    relationName = models.CharField(max_length=255, default="relation")
+    issueToken = models.CharField(max_length=255, default="")
     suggestionToken = models.CharField(max_length=255, default="")
     channel = models.JSONField(null=True)
     issueUser = models.ForeignKey(UserAccount, on_delete=models.CASCADE, related_name='issued_by')
