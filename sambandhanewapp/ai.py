@@ -12,16 +12,29 @@ model = genai.GenerativeModel("gemini-1.5-flash")
 
 
 
+def checkCriticalIssue(request, datas):
+    data = datas
+    issue = data['description']
+    prompts = {
+        f"Is the following issue critical? {issue} Answer only with 'yes' or 'no'.",
+    }
+    response = model.generate_content(f"{prompts}")
+    response_text = response.text.strip().lower()
+    if response_text == 'yes':
+        return True
+    return False
+
+    
+
+
 
 def filterComment(request, commentdata):
     comment = commentdata['message']
     issueID = commentdata['issueID']
-    
     try:
         user_issue = UserIssue.objects.get(id = issueID)
         prompts = {
-            f"Is the following comment abusive in any language? {comment} Answer only with 'yes' or 'no'.",
-            f"Is the following comment is related to this issue? {user_issue} Answer only with 'yes' or 'no'.",
+            f"Is the following comment abusive in any language? {comment} Answer only with 'yes' or 'no'. Or Is the following comment is related to this issue? {user_issue} Answer only with 'yes' or 'no'.",
         }
         response = model.generate_content(f"{prompts}")
         response_text = response.text.strip().lower()
@@ -31,6 +44,27 @@ def filterComment(request, commentdata):
     except Exception as e:
         return Response({'error': str(e)})
 
+
+
+
+
+def filterReply(request, data):
+    data = data
+    issueID = data['issueID']
+    replyMessage = data['message']
+    try:
+        user_issue = UserIssue.objects.get(id = issueID)
+        prompts = {
+            f"Reply{replyMessage}"
+            f"Is the reply is abusive or not related to the given issue {user_issue} Answer only with 'yes' or 'no'. Or Is the following reply abusive in any language? {replyMessage} Answer only with 'yes' or 'no'.",
+        }
+        response = model.generate_content(f"{prompts}")
+        response_text = response.text.strip().lower()
+        if response_text == 'yes':
+            return  True
+        return False
+    except Exception as e:
+        return Response({'error': str(e)})
 
 
 

@@ -8,12 +8,12 @@ class UserAccount(models.Model):
                 ('father', 'Father'),
                 ('mother', 'Mother'),
                 ('son', 'Son'),
-                ('daughter', 'Daughter'),
                 ('teacher', 'Teacher'),
                 ('student', 'Student'),
                 ('uncle', 'Uncle'),
-                ('brother', 'brother'),
-                ('sister', 'sister'),
+                ('sister', 'Sister'),
+                ('brother', 'Brother'),
+                ('daughter', 'Daughter'),
     ]
 
     userID = models.CharField(max_length=100)
@@ -39,13 +39,15 @@ class UserAccount(models.Model):
 
 class UserIssue(models.Model):
         CHARACTERFIELD = [
-                ('father', 'Father'),
+               ('father', 'Father'),
                 ('mother', 'Mother'),
                 ('son', 'Son'),
-                ('daughter', 'Daughter'),
-                ('grandfather', 'Grandfather'),
-                ('grandmother', 'Grandmother'),
+                ('teacher', 'Teacher'),
+                ('student', 'Student'),
                 ('uncle', 'Uncle'),
+                ('sister', 'Sister'),
+                ('brother', 'Brother'),
+                ('daughter', 'Daughter'),
 
                 ]   
         issuedBy  = models.ForeignKey(UserAccount, on_delete=models.CASCADE)

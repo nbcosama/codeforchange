@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view
 from .serializers import *
 from django.utils import timezone
 from django.db.models import Q
-from .ai import filterComment
+from .ai import filterComment, filterReply, checkCriticalIssue
 # Create your views here.
 
 
@@ -66,6 +66,9 @@ def getUser(request):
 @api_view(['POST'])
 def issue_api(request):
     datas = request.data
+    criticalIssue = checkCriticalIssue(request, datas)
+    if criticalIssue == True:
+        return Response({"success": False, "message": "Rejected! This issue is critical"})
     main_user = UserAccount.objects.get(userID = datas['issuedBy'])
     datas['issuedBy'] = main_user.id
     user_issue = UserIssue.objects.all()
@@ -94,6 +97,9 @@ def postIssueReply(request):
     data = request.data
     issueID = data['issueID']
     repliedBy = data['repliedBy']
+    checkReply = filterReply(request, data)
+    if checkReply == True:
+        return Response({"success": False, "message": "Rejected! Your reply was abusive or not related to this issue"})
     try:
         user_account = UserAccount.objects.get(userID = repliedBy)
         user_issue = UserIssue.objects.get(id = issueID)
@@ -225,7 +231,7 @@ def postComment(request):
     commentdata = data
     checkComment = filterComment(request, commentdata)
     if checkComment == True:
-        return Response({"success": False, "message": "Rejected! Your comment was abusive or not related to the issue"})
+        return Response({"success": False, "message": "Rejected! Your comment was abusive or not related to this issue"})
     try:
         user_account = UserAccount.objects.get(userID = commentedBy)
         user_issue = UserIssue.objects.get(id = issueID)
